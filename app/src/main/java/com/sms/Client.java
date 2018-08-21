@@ -132,7 +132,7 @@ public class Client {
                 }
                 sdata = new byte[0];
             } catch (SocketTimeoutException e) {
-                Log4a.e("SocketClient - Exception",e.getMessage());
+                Log4a.e("SocketClient - Exception","SocketTimeoutException SocketTimeoutException SocketTimeoutException");
                 try {
                     Thread.sleep(100);
                     Date ntime = new Date();
@@ -146,7 +146,7 @@ public class Client {
                     Log4a.e("Client", "timeout-sleep:" + kk);
                     InputStream = new DataInputStream(soc.getInputStream());
                 } catch (InterruptedException e1) {
-                    Log4a.e("SocketClient - Exception",e1.getMessage());
+                    Log4a.e("SocketClient - Exception","");
                     Close();
                     break;
                 } catch (IOException e1) {

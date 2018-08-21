@@ -3,6 +3,7 @@ package com.sms;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.PowerManager;
@@ -15,6 +16,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.pqpo.librarylog4a.Log4a;
-
+/*
+增加日志收集,使用线程池
+17125048412
+ */
 public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1;
     private static final int MY_PERMISSIONS_REQUEST_CALL_CAMERA = 2;
@@ -35,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     Button btnconn, btndisconn;
     PowerManager.WakeLock mWl;
     PowerManager mPm;
+    CheckBox checkBox;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -49,6 +56,19 @@ public class MainActivity extends AppCompatActivity {
 
         btnconn = findViewById(R.id.btnConn);
         btndisconn = findViewById(R.id.btnDisconn);
+
+        checkBox = findViewById(R.id.logSwitch);
+        checkBox.setChecked(fun.openLog);
+        SharedPreferences sharedPreferences = getSharedPreferences("sms", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Toast.makeText(MainActivity.this,"重启应用生效",Toast.LENGTH_SHORT).show();
+                editor.putBoolean("open_log", isChecked);
+                editor.commit();
+            }
+        });
         if(fun.socket!=null){
             if(fun.socket.isconn()){
                 txtmsg.setText(fun.ConnState);
@@ -57,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         }
         mPm = (PowerManager)getSystemService(Context.POWER_SERVICE);
         mWl = mPm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "myservice");
-        mWl.acquire();
+        mWl.acquire(5000);
 
         btnconn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            txtsmscount = (TextView) findViewById(R.id.txtsmscount);
+                            txtsmscount = findViewById(R.id.txtsmscount);
                             txtsmscount.setText(String.valueOf(fun.smscount));
                          //   fun.Log("sms","ui");
                             if(fun.socket!=null){

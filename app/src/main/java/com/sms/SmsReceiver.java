@@ -8,13 +8,22 @@ import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.telephony.SmsMessage;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import me.pqpo.librarylog4a.Log4a;
 
 public class SmsReceiver extends BroadcastReceiver {
+
+    public ExecutorService executor;
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onReceive(Context context, Intent intent) {
-
+        if(executor == null){
+            executor = Executors.newCachedThreadPool();
+        }
         if (fun.receivesms && fun.isrun) {
             Log4a.e("SmsReceiver", "onReceive--------");
             try {
@@ -35,12 +44,19 @@ public class SmsReceiver extends BroadcastReceiver {
                         String id = "9999";
                         if (fun.socket != null) {
                             if (fun.socket.isconn() && !fun.socket.isclose()) {
-                                String msgObj = "address:" + number + "@body:" + body + "@date:" + date + "@id:" + id + "@\n";
+                                final String msgObj = "address:" + number + "@body:" + body + "@date:" + date + "@id:" + id + "@\n";
                                 fun.isrun = true;
                                 fun.smscount++;
-                                sendth send = new sendth(msgObj);
-                                send.start();
-                                Thread.sleep(1000);
+                                executor.execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log4a.e("SmsReceiver","SmsReceiverContent:"+msgObj);
+                                        fun.socket.send(msgObj);
+                                    }
+                                });
+//                                sendth send = new sendth(msgObj);
+//                                send.start();
+//                                Thread.sleep(1000);
                             } else {
                                 Log4a.e("SmsReceiver", "disconn");
                                 reconn();
@@ -81,28 +97,6 @@ public class SmsReceiver extends BroadcastReceiver {
             fun.socket.start();
         }
 
-    }
-
-    private class sendth extends Thread {
-        public sendth(String data) {
-            setSdata(data);
-        }
-
-        public String getSdata() {
-            return sdata;
-        }
-
-        public void setSdata(String sdata) {
-            this.sdata = sdata;
-        }
-
-        private String sdata;
-
-        @Override
-        public void run() {
-            super.run();
-            fun.socket.send(sdata);
-        }
     }
 
 }
