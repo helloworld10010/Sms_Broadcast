@@ -8,7 +8,10 @@ import android.util.Log;
 import java.util.Date;
 import java.util.HashMap;
 
+import me.pqpo.librarylog4a.Log4a;
+
 public class fun {
+     public static final String RESET_SMS_COUNT = "reset_sms_count";
      static String ProjectID="0001";
      static String IP="183.196.13.28";
      static String Port="12307";
@@ -24,7 +27,7 @@ public class fun {
      static Socketth socket=null;
      static int HeartCycle=30;
      static int LoopCycle=1;
-     static boolean openLog=true;
+     static boolean openLog = true;
      static Date receTime=new Date();
      static HashMap<Integer, byte[]> ls = new HashMap<Integer, byte[]>();
 
@@ -56,7 +59,7 @@ public class fun {
      }
      public static void Log(String key,String value){
           if(openLog)
-               Log.v(key, value);
+               Log4a.e(key,value);
      }
      public static byte[] int2byte(int res) {
           byte[] targets = new byte[4];

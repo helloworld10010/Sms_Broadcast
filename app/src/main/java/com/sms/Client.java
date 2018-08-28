@@ -61,7 +61,7 @@ public class Client {
                                     Date ntime = new Date();
                                     long kk = ntime.getTime() - fun.receTime.getTime();
                                     if (kk > (fun.HeartCycle + 20) * 1000) {
-                                        Log4a.e("Client", "over HeartCycle:");
+                                        fun.Log("Client", "over HeartCycle:");
                                         Close();
                                         break;
 
@@ -70,7 +70,7 @@ public class Client {
                                     sendHeart();
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                    Log4a.e("SocketClient - Exception",e.getMessage());
+                                    fun.Log("SocketClient - Exception",e.getMessage());
                                     Close();
                                     break;
                                 }
@@ -84,23 +84,23 @@ public class Client {
                             Receive();
                         }
                     }.start();
-                    Log4a.e("client", "connect ok");
+                    fun.Log("client", "connect ok");
                 } else {
                     con = false;
-                    Log4a.e("client", "connect is fails");
+                    fun.Log("client", "connect is fails");
                     Close();
                 }
             } catch (IOException e) {
                 con = false;
-                Log4a.e("client connect", e.getMessage());
+                fun.Log("client connect", e.getMessage());
                 e.printStackTrace();
-                Log4a.e("SocketClient - Exception",e.getMessage());
+                fun.Log("SocketClient - Exception",e.getMessage());
                 Close();
             }
 
 
         } else {
-            Log4a.e("client", "connect is over");
+            fun.Log("client", "connect is over");
         }
     }
 
@@ -127,40 +127,40 @@ public class Client {
                 if (len > 0) {
                     fun.receTime = new Date();
                     String id = new String(sdata, 0, len);
-                    Log4a.e("ret", id);
+                    fun.Log("ret", id);
 
                 }
                 sdata = new byte[0];
             } catch (SocketTimeoutException e) {
-                Log4a.e("SocketClient - Exception","SocketTimeoutException SocketTimeoutException SocketTimeoutException");
+                fun.Log("SocketClient - Exception","SocketTimeoutException SocketTimeoutException SocketTimeoutException");
                 try {
                     Thread.sleep(100);
                     Date ntime = new Date();
                     long kk = ntime.getTime() - fun.receTime.getTime();
                     if (kk > (fun.HeartCycle + 20) * 1000) {
-                        Log4a.e("Client", "over HeartCycle:");
+                        fun.Log("Client", "over HeartCycle:");
                         Close();
                         break;
 
                     }
-                    Log4a.e("Client", "timeout-sleep:" + kk);
+                    fun.Log("Client", "timeout-sleep:" + kk);
                     InputStream = new DataInputStream(soc.getInputStream());
                 } catch (InterruptedException e1) {
-                    Log4a.e("SocketClient - Exception","");
+                    fun.Log("SocketClient - Exception","");
                     Close();
                     break;
                 } catch (IOException e1) {
-                    Log4a.e("SocketClient - Exception",e1.getMessage());
+                    fun.Log("SocketClient - Exception",e1.getMessage());
                     Close();
                     break;
                 }
                 continue;
             } catch (StringIndexOutOfBoundsException e) {
-                Log4a.e("SocketClient - Exception",e.getMessage());
+                fun.Log("SocketClient - Exception",e.getMessage());
                 Close();
                 break;
             } catch (IOException e) {
-                Log4a.e("SocketClient - Exception",e.getMessage());
+                fun.Log("SocketClient - Exception",e.getMessage());
                 Close();
                 break;
             }
@@ -179,9 +179,9 @@ public class Client {
                 soc.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log4a.e("SocketClient - Exception",e.getMessage());
+                fun.Log("SocketClient - Exception",e.getMessage());
             } finally {
-                Log4a.e("Client", "disconnect");
+                fun.Log("Client", "disconnect");
                 fun.socket = null;
             }
         }
@@ -198,9 +198,9 @@ public class Client {
                 soc.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log4a.e("SocketClient - Exception",e.getMessage());
+                fun.Log("SocketClient - Exception",e.getMessage());
             } finally {
-                Log4a.e("Client", "disconnect");
+                fun.Log("Client", "disconnect");
                 fun.socket = null;
             }
         }
@@ -215,11 +215,11 @@ public class Client {
                 //	os.flush();
                 os.write(data);
                 os.flush(); // 发送图片流，继续等待 结束指令
-                Log4a.e("Client", "sendbyte");
+                fun.Log("Client", "sendbyte");
             } catch (Exception e) {
 				e.printStackTrace();
-                Log4a.e("Client", "SendByte Error:" + e.getMessage());
-                Log4a.e("SocketClient - Exception - SendByte Error:",e.getMessage());
+                fun.Log("Client", "SendByte Error:" + e.getMessage());
+                fun.Log("SocketClient - Exception - SendByte Error:",e.getMessage());
 
                 Close();
 
@@ -238,10 +238,10 @@ public class Client {
                     OutputStream os = soc.getOutputStream();
                     os.write(data.getBytes());
                     os.flush(); // 发送图片流，继续等待 结束指令
-                Log4a.e("send", data);
+                fun.Log("send", data);
             } catch (IOException e) {
                 e.printStackTrace();
-                Log4a.e("SocketClient - Exception - SendByte Error:",e.getMessage());
+                fun.Log("SocketClient - Exception - SendByte Error:",e.getMessage());
                 Close();
             }
 

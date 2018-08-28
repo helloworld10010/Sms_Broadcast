@@ -6,18 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Telephony;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,11 +36,10 @@ public class MainActivity extends AppCompatActivity {
     List<String> mPermissionList = new ArrayList<>();
     TextView txtmsg, txtsmscount;
     EditText edtip;
-    Button btnconn, btndisconn;
+    Button btnconn, btndisconn,btnreset;
     PowerManager.WakeLock mWl;
     PowerManager mPm;
     CheckBox checkBox;
-
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,21 +50,25 @@ public class MainActivity extends AppCompatActivity {
 
         edtip =  findViewById(R.id.edtIP);
         txtmsg =  findViewById(R.id.txtmsg);
-
+        btnreset = findViewById(R.id.btnReset);
         btnconn = findViewById(R.id.btnConn);
         btndisconn = findViewById(R.id.btnDisconn);
 
         checkBox = findViewById(R.id.logSwitch);
-        checkBox.setChecked(fun.openLog);
         SharedPreferences sharedPreferences = getSharedPreferences("sms", Context.MODE_PRIVATE);
+        fun.openLog = sharedPreferences.getBoolean("open_log",true);
+        checkBox.setChecked(fun.openLog);
+
         final SharedPreferences.Editor editor = sharedPreferences.edit();
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Toast.makeText(MainActivity.this,"重启应用生效",Toast.LENGTH_SHORT).show();
-                editor.putBoolean("open_log", isChecked);
-                editor.commit();
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked){
+                Toast.makeText(MainActivity.this,"打开日志记录",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this,"关闭日志记录",Toast.LENGTH_SHORT).show();
             }
+            editor.putBoolean("open_log", isChecked);
+            fun.openLog = isChecked;
+            editor.commit();
         });
         if(fun.socket!=null){
             if(fun.socket.isconn()){
@@ -79,47 +80,46 @@ public class MainActivity extends AppCompatActivity {
         mWl = mPm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "myservice");
         mWl.acquire(5000);
 
-        btnconn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                fun.IP = ((EditText) findViewById(R.id.edtIP)).getText().toString().trim();
-                fun.Port = ((EditText) findViewById(R.id.edtPort)).getText().toString().trim();
+        btnconn.setOnClickListener(view -> {
+            fun.IP = ((EditText) findViewById(R.id.edtIP)).getText().toString().trim();
+            fun.Port = ((EditText) findViewById(R.id.edtPort)).getText().toString().trim();
 //            if(fun.loop==null)
 //                fun.loop=new smsloop(this);
-                if (!fun.IP.equals("") && !fun.Port.equals("")) {
-                    txtmsg.setText("链接中...");
-                    fun.ConnState = "";
-                    btnconn.setEnabled(false);
-                    showstate();
-                    Intent innerIntent = new Intent(MainActivity.this, SNSService.class);
-                    startService(innerIntent);
-                    fun.isrun = true;
+            if (!fun.IP.equals("") && !fun.Port.equals("")) {
+                txtmsg.setText("链接中...");
+                fun.ConnState = "";
+                btnconn.setEnabled(false);
+                showstate();
+                Intent innerIntent = new Intent(MainActivity.this, SNSService.class);
+                startService(innerIntent);
+                fun.isrun = true;
 
-                } else {
-                    showToast("IP地址与端口号必填");
-                }
-
+            } else {
+                showToast("IP地址与端口号必填");
             }
         });
 
-        btndisconn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                txtmsg.setText("断开中...");
-                fun.isrun = false;
-                fun.ConnState = "";
-                btnconn.setEnabled(true);
-                fun.receivesms = false;
-                if (fun.socket != null) {
-                    fun.socket.close();
-                    fun.socket=null;
-                }
-                else{
-                    fun.ConnState = "链接断开";
-                }
-
-                showstate();
+        btndisconn.setOnClickListener(view -> {
+            txtmsg.setText("断开中...");
+            fun.isrun = false;
+            fun.ConnState = "";
+            btnconn.setEnabled(true);
+            fun.receivesms = false;
+            if (fun.socket != null) {
+                fun.socket.close();
+                fun.socket=null;
             }
+            else{
+                fun.ConnState = "链接断开";
+            }
+
+            showstate();
+        });
+
+        btnreset.setOnClickListener(v -> {
+            fun.smscount = 0;
+            txtsmscount.setText("0");
+            Toast.makeText(this, "清除统计", Toast.LENGTH_SHORT).show();
         });
         showsmscount();
     }
@@ -135,17 +135,14 @@ public class MainActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            txtsmscount = findViewById(R.id.txtsmscount);
-                            txtsmscount.setText(String.valueOf(fun.smscount));
-                         //   fun.Log("sms","ui");
-                            if(fun.socket!=null){
-                                if(fun.socket.isconn()){
-                                    txtmsg.setText(fun.ConnState);
-                                    btnconn.setEnabled(fun.isrun==false);
-                                }
+                    runOnUiThread(() -> {
+                        txtsmscount = findViewById(R.id.txtsmscount);
+                        txtsmscount.setText(String.valueOf(fun.smscount));
+                     //   fun.Log("sms","ui");
+                        if(fun.socket!=null){
+                            if(fun.socket.isconn()){
+                                txtmsg.setText(fun.ConnState);
+                                btnconn.setEnabled(fun.isrun==false);
                             }
                         }
                     });
@@ -167,22 +164,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                     if (!txtmsg.getText().toString().trim().equals(fun.ConnState)) {
 
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
+                        runOnUiThread(() -> {
 
-                                if (!fun.ConnState.equals("")) {
-                                    txtmsg.setText(fun.ConnState);
-                                    index = 50;
-                                    if (fun.ConnState.equals("链接成功")) {
-                                        btnconn.setEnabled(false);
-                                    } else {
-                                        btnconn.setEnabled(true);
-                                    }
-
+                            if (!fun.ConnState.equals("")) {
+                                txtmsg.setText(fun.ConnState);
+                                index = 50;
+                                if (fun.ConnState.equals("链接成功")) {
+                                    btnconn.setEnabled(false);
+                                } else {
+                                    btnconn.setEnabled(true);
                                 }
-                            }
 
+                            }
                         });
 
                     } else {
@@ -205,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Log4a.e("MainActivity","onStart-----------");
+        fun.Log("MainActivity","onStart-----------");
         try {
             // 设置默认应用
             final String myPackageName = getPackageName();
@@ -278,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
             mWl.release();
         }
         fun.Log("sms", "Destroy");
-        Log4a.e("MainActivity","onDestroy-----------");
+        fun.Log("MainActivity","onDestroy-----------");
         Log4a.release();
     }
 }

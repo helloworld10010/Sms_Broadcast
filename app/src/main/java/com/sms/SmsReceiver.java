@@ -18,14 +18,15 @@ import me.pqpo.librarylog4a.Log4a;
 public class SmsReceiver extends BroadcastReceiver {
 
     public ExecutorService executor;
-    @RequiresApi(api = Build.VERSION_CODES.M)
+//    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onReceive(Context context, Intent intent) {
+        fun.Log("SmsReceiver", "onReceive------------");
         if(executor == null){
             executor = Executors.newCachedThreadPool();
         }
         if (fun.receivesms && fun.isrun) {
-            Log4a.e("SmsReceiver", "onReceive--------");
+
             try {
                 //接受intent对象当中的数据
                 Bundle bundle = intent.getExtras();
@@ -50,7 +51,7 @@ public class SmsReceiver extends BroadcastReceiver {
                                 executor.execute(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Log4a.e("SmsReceiver","SmsReceiverContent:"+msgObj);
+                                        fun.Log("SmsReceiver","SmsReceiverContent:"+msgObj);
                                         fun.socket.send(msgObj);
                                     }
                                 });
@@ -58,31 +59,31 @@ public class SmsReceiver extends BroadcastReceiver {
 //                                send.start();
 //                                Thread.sleep(1000);
                             } else {
-                                Log4a.e("SmsReceiver", "disconn");
+                                fun.Log("SmsReceiver", "disconn");
                                 reconn();
                                 break;
 
                             }
                         } else {
-                            Log4a.e("SmsReceiver", "not netweb");
+                            fun.Log("SmsReceiver", "not netweb");
                             reconn();
                             break;
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Log4a.e("SmsReceiver - Exception",e.getMessage());
+                        fun.Log("SmsReceiver - Exception",e.getMessage());
                         reconn();
                         break;
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Log4a.e("SmsReceiver - Exception",e.getMessage());
+                fun.Log("SmsReceiver - Exception",e.getMessage());
                 reconn();
 
             }
         }else{
-            Log4a.e("SmsReceiver", "receive not run");
+            fun.Log("SmsReceiver", "receive not run");
         }
 
 

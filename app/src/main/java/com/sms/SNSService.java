@@ -24,15 +24,15 @@ public class SNSService extends Service {
 
     @Override
     public void onCreate() {
-//        Log4a.e(TAG, "SNSService->onCreate");
-        Log4a.e(TAG,"SNSService->onCreate");
+//        fun.Log(TAG, "SNSService->onCreate");
+        fun.Log(TAG,"SNSService->onCreate");
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        Log4a.e(TAG, "SNSService->onStartCommand"); // 利用 Android 漏洞提高进程优先级，
-        Log4a.e(TAG,"SNSService->onStartCommand");
+//        fun.Log(TAG, "SNSService->onStartCommand"); // 利用 Android 漏洞提高进程优先级，
+        fun.Log(TAG,"SNSService->onStartCommand");
         startForeground(DAEMON_SERVICE_ID, new Notification()); // 当 SDk 版本大于18时，需要通过内部 Service 类启动同样 id 的 Service
         if (Build.VERSION.SDK_INT >= 18) {
             Intent innerIntent = new Intent(this, DaemonInnerService.class);
@@ -55,20 +55,20 @@ public class SNSService extends Service {
 
     @Override
     public void onDestroy() {
-        Log4a.e(TAG, "SNSService->onDestroy");
+        fun.Log(TAG, "SNSService->onDestroy");
         super.onDestroy();
     }
 
     public static class DaemonInnerService extends Service {
         @Override
         public void onCreate() {
-            Log4a.e(TAG, "DaemonInnerService -> onCreate");
+            fun.Log(TAG, "DaemonInnerService -> onCreate");
             super.onCreate();
         }
 
         @Override
         public int onStartCommand(Intent intent, int flags, int startId) {
-            Log4a.e(TAG, "DaemonInnerService -> onStartCommand");
+            fun.Log(TAG, "DaemonInnerService -> onStartCommand");
             startForeground(DAEMON_SERVICE_ID, new Notification());
             stopSelf();
             return super.onStartCommand(intent, flags, startId);
@@ -81,7 +81,7 @@ public class SNSService extends Service {
 
         @Override
         public void onDestroy() {
-            Log4a.e(TAG, "DaemonInnerService -> onDestroy");
+            fun.Log(TAG, "DaemonInnerService -> onDestroy");
             super.onDestroy();
         }
     }

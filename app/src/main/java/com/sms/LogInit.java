@@ -26,7 +26,7 @@ public class LogInit {
             @Override
             public boolean intercept(LogData logData) {
                 logData.tag = "Log4a-" + logData.tag;
-                return fun.openLog;
+                return true;
             }
         };
         AndroidAppender androidAppender = new AndroidAppender.Builder()

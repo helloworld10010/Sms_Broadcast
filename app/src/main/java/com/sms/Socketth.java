@@ -10,8 +10,8 @@ public class Socketth extends Thread {
     public Socketth(String ip, int port) {
         ip_ = ip;
         port_ = port;
-        Log4a.e("Socketth - IP", ip_);
-        Log4a.e("Socketth - Port", port_ + "");
+        fun.Log("Socketth - IP", ip_);
+        fun.Log("Socketth - Port", port_ + "");
 
     }
 
